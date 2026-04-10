@@ -36,7 +36,7 @@ public class ProfessorRepository {
         em.getTransaction().commit();
     }
 
-    public Professor findByNome(String nome){
+    public Professor findByName(String nome){
         List<Professor> lista = em
                 .createQuery("from Professor p where p.nome = :nome",Professor.class)
                 .setParameter("nome", nome)
