@@ -1,17 +1,39 @@
 package br.sistema;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-public class Main {
-    static void main() {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        IO.println(String.format("Hello and welcome!"));
+import br.sistema.config.JpaUtil;
+import br.sistema.entity.Disciplina;
+import br.sistema.repository.DisciplinaRepository;
+import jakarta.persistence.EntityManager;
+import org.flywaydb.core.Flyway;
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            IO.println("i = " + i);
-        }
+import java.util.List;
+
+public class Main {
+    public static void main(String[] args) {
+
+
+        // 1. Você precisa abrir a sua conexão (EntityManager)
+        EntityManager em = JpaUtil.getEntityManager();
+
+        DisciplinaRepository disciplinaRepository = new DisciplinaRepository(em);
+
+        System.out.println("Executando migrações do banco de dados...");
+        Flyway flyway = Flyway.configure()
+                .dataSource("jdbc:postgresql://localhost:5432/grade", "postgres", "1234")
+                .load();
+
+        flyway.migrate();
+        System.out.println("Migrações concluídas com sucesso!");
+
+
+
+        System.out.println("Sistema iniciado.");
+
+        //Disciplina disciplina = new Disciplina();
+        //disciplina.setNome(null);
+        List<Disciplina> teste = disciplinaRepository.findAll();
+
+
+        JpaUtil.getEntityManager().close();
     }
 }
