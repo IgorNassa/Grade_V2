@@ -16,8 +16,6 @@ public class Professor {
     private Long id;
     private String nome;
 
-
-
     @ManyToMany
     @JoinTable (
             name = "professor_disciplina",

@@ -2,6 +2,7 @@ package br.sistema.repository;
 
 import br.sistema.entity.Disciplina;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 
 import java.util.List;
 
@@ -42,9 +43,13 @@ public class DisciplinaRepository {
     }
 
     //C*R*UD - Função de listar por nome do banco
-    public Disciplina findByName(String nome){
-        return em.createQuery("SELECT d FROM Disciplina d WHERE d.nome = :nome", Disciplina.class)
-                .setParameter("nome", nome)
-                .getSingleResult();
+    public Disciplina findByName(String nome) {
+        try {
+            return em.createQuery("SELECT d FROM Disciplina d WHERE d.nome = :nome", Disciplina.class)
+                    .setParameter("nome", nome)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 }

@@ -27,7 +27,7 @@ public class DisciplinaService {
             try {
                 Disciplina disciplinaExiste = disciplinaRepository.findByName(disciplina.getNome());
                 if (disciplinaExiste != null) {
-                    System.err.println("Disciplina já existe");
+                    throw new RuntimeException("Já existe um registo com o nome: " + disciplina.getNome());
                 }
                 disciplinaRepository.save(disciplina);
 

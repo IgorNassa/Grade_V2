@@ -2,167 +2,99 @@ package br.sistema.service;
 
 import br.sistema.entity.Professor;
 import br.sistema.repository.ProfessorRepository;
-import jakarta.persistence.NoResultException;
-<<<<<<< HEAD
-import jakarta.persistence.PersistenceException;
-import org.hibernate.exception.ConstraintViolationException;
-
-=======
-
->>>>>>> ea40ec5380f1bc1674d4e4ded225256ba8802962
 import java.util.List;
 
 public class ProfessorService {
 
-<<<<<<< HEAD
-    private ProfessorRepository ProfessorRepository;
-
-    public ProfessorService(ProfessorRepository professorRepository){
-        this.ProfessorRepository = ProfessorRepository;
-    }
-
-    public void salvar(Professor professor) throws PersistenceException {
-        if (professor.getNome() == null || professor.getNome().trim().isEmpty()){
-            throw new IllegalArgumentException();
-        }
-        else {
-            try {
-                Professor professorExiste = ProfessorRepository.findByName(professor.getNome());
-                if (professorExiste != null) {
-                    System.err.println("Professor já existe");
-                }
-                ProfessorRepository.save(professor);
-
-            } catch (ConstraintViolationException e ) {
-                System.out.println("Erro ao salvar" + e);
-            } catch (Exception e) {
-                System.out.println("Erro" + e);
-            }
-=======
     private final ProfessorRepository professorRepository;
 
-    public ProfessorService(ProfessorRepository professorRepository){
+    public ProfessorService(ProfessorRepository professorRepository) {
         this.professorRepository = professorRepository;
     }
 
-    public void salvar(Professor professor) {
-
-        if (professor.getNome() == null || professor.getNome().trim().isEmpty()){
-            throw new IllegalArgumentException("Nome não pode ser vazio");
-        }
-
-        Professor professorExiste = professorRepository.findByName(professor.getNome());
-
-        if (professorExiste != null) {
-            throw new RuntimeException("Professor já existe");
-        }
-
+    public void save(Professor professor) {
         try {
+            if (professor.getNome() == null || professor.getNome().trim().isEmpty()) {
+                throw new IllegalArgumentException("O nome do professor não pode ser vazio.");
+            }
+
+            Professor professorExiste = professorRepository.findByName(professor.getNome());
+
+            if (professorExiste != null) {
+                throw new RuntimeException("Já existe um professor cadastrado com este nome.");
+            }
+
             professorRepository.save(professor);
+
         } catch (Exception e) {
-            throw new RuntimeException("Erro ao salvar professor", e);
->>>>>>> ea40ec5380f1bc1674d4e4ded225256ba8802962
+            System.err.println("[ERRO] Falha na operação salvar: " + e.getMessage());
+            throw new RuntimeException("Erro ao salvar o professor.", e);
         }
     }
 
-    public void alterar (Professor professor){
-<<<<<<< HEAD
-        if (professor.getNome() == null || professor.getNome().trim().isEmpty()){
-            throw new IllegalArgumentException();
-        }
+    public void update(Professor professor) {
         try {
-            Professor professorExiste = ProfessorRepository.findByName(professor.getNome());
-            if (professorExiste == null) {
-                System.err.println("Professor não existe!");
+            if (professor.getNome() == null || professor.getNome().trim().isEmpty()) {
+                throw new IllegalArgumentException("Nome inválido para atualização.");
             }
 
-            ProfessorRepository.update(professor);
+            Professor professorExiste = professorRepository.findByName(professor.getNome());
 
-        } catch (ConstraintViolationException e ) {
-            System.out.println("Erro ao atualizar" + e);
-        } catch (Exception e) {
-            System.out.println("Erro" + e);
-=======
+            if (professorExiste == null) {
+                throw new RuntimeException("Professor não encontrado na base de dados para atualizar.");
+            }
 
-        if (professor.getNome() == null || professor.getNome().trim().isEmpty()){
-            throw new IllegalArgumentException("Nome inválido");
-        }
-
-        Professor professorExiste = professorRepository.findByName(professor.getNome());
-
-        if (professorExiste == null) {
-            throw new RuntimeException("Professor não existe");
-        }
-
-        try {
             professorRepository.update(professor);
+
         } catch (Exception e) {
-            throw new RuntimeException("Erro ao atualizar professor", e);
->>>>>>> ea40ec5380f1bc1674d4e4ded225256ba8802962
+            System.err.println("[ERRO] Falha na operação update: " + e.getMessage());
+            throw new RuntimeException("Erro ao atualizar o professor.", e);
         }
     }
 
-    public void excluir (Professor professor){
-<<<<<<< HEAD
+    public void delete(Professor professor) {
         try {
-            Professor professorExiste = ProfessorRepository.findByName(professor.getNome());
+            Professor professorExiste = professorRepository.findByName(professor.getNome());
 
             if (professorExiste == null) {
-                System.err.println("Professor não existe!");
+                throw new RuntimeException("Professor não encontrado na base de dados para exclusão.");
             }
-            ProfessorRepository.delete(professor);
 
-        } catch (NoResultException e ) {
-            System.err.println("[ERROR] Professor não encontrado: " + e);
-        } catch (Exception e) {
-            System.err.println("[ERROR] Alguma coisa deu erro: " + e);
-=======
-
-        Professor professorExiste = professorRepository.findByName(professor.getNome());
-
-        if (professorExiste == null) {
-            throw new RuntimeException("Professor não existe");
-        }
-
-        try {
             professorRepository.delete(professor);
+
         } catch (Exception e) {
-            throw new RuntimeException("Erro ao excluir professor", e);
->>>>>>> ea40ec5380f1bc1674d4e4ded225256ba8802962
+            System.err.println("[ERRO] Falha na operação delete: " + e.getMessage());
+            throw new RuntimeException("Erro ao excluir o professor.", e);
         }
     }
 
-    public List<Professor> verTodos () {
-<<<<<<< HEAD
-        try {
-            List<Professor> professor = ProfessorRepository.findAll();
-
-            if(professor == null) {
-                System.out.println("Lista vazia");
-                return null;
-            }
-            return professor;
-
-        } catch (Exception e) {
-            System.err.println("Erro" + e);
-            throw e;
-        }
-    }
-}
-=======
-
+    public List<Professor> findAll() {
         try {
             List<Professor> professores = professorRepository.findAll();
 
-            if (professores.isEmpty()) {
-                System.out.println("Nenhum professor cadastrado");
+            if (professores == null || professores.isEmpty()) {
+                System.out.println("Nenhum professor cadastrado no momento.");
             }
 
             return professores;
 
         } catch (Exception e) {
-            throw new RuntimeException("Erro ao buscar professores", e);
+            System.err.println("[ERRO] Falha na operação findAll: " + e.getMessage());
+            throw new RuntimeException("Erro ao buscar a lista de professores.", e);
+        }
+    }
+
+    public Professor findByName(String nome) {
+        try {
+            if (nome == null || nome.trim().isEmpty()) {
+                throw new IllegalArgumentException("O nome para busca não pode ser vazio.");
+            }
+
+            return professorRepository.findByName(nome);
+
+        } catch (Exception e) {
+            System.err.println("[ERRO] Falha na operação findByName: " + e.getMessage());
+            throw new RuntimeException("Erro ao buscar o professor pelo nome.", e);
         }
     }
 }
->>>>>>> ea40ec5380f1bc1674d4e4ded225256ba8802962
