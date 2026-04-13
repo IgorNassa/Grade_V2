@@ -15,20 +15,18 @@ public class ProfessorService {
     public void save(Professor professor) {
         try {
             if (professor.getNome() == null || professor.getNome().trim().isEmpty()) {
-                throw new IllegalArgumentException("O nome do professor não pode ser vazio.");
+                throw new IllegalArgumentException("Nome do professor obrigatório.");
             }
 
-            Professor professorExiste = professorRepository.findByName(professor.getNome());
-
-            if (professorExiste != null) {
-                throw new RuntimeException("Já existe um professor cadastrado com este nome.");
+            Professor existe = professorRepository.findByName(professor.getNome());
+            if (existe != null) {
+                throw new RuntimeException("Professor já cadastrado!");
             }
 
             professorRepository.save(professor);
-
         } catch (Exception e) {
-            System.err.println("[ERRO] Falha na operação salvar: " + e.getMessage());
-            throw new RuntimeException("Erro ao salvar o professor.", e);
+            System.err.println("[ERRO SERVICE] " + e.getMessage());
+            throw e;
         }
     }
 
@@ -38,10 +36,9 @@ public class ProfessorService {
                 throw new IllegalArgumentException("Nome inválido para atualização.");
             }
 
-            Professor professorExiste = professorRepository.findByName(professor.getNome());
-
+            Professor professorExiste = professorRepository.findByName(professor.getNome().toLowerCase().trim());
             if (professorExiste == null) {
-                throw new RuntimeException("Professor não encontrado na base de dados para atualizar.");
+                throw new RuntimeException("Professor não encontrado para atualizar.");
             }
 
             professorRepository.update(professor);
@@ -54,47 +51,35 @@ public class ProfessorService {
 
     public void delete(Professor professor) {
         try {
-            Professor professorExiste = professorRepository.findByName(professor.getNome());
+            // 1. Busca o professor real no banco pelo nome (usando o ignore case que aplicamos no repo)
+            Professor professorNoBanco = professorRepository.findByName(professor.getNome().trim());
 
-            if (professorExiste == null) {
-                throw new RuntimeException("Professor não encontrado na base de dados para exclusão.");
+            if (professorNoBanco == null) {
+                throw new RuntimeException("Professor não encontrado para exclusão: " + professor.getNome());
             }
 
-            professorRepository.delete(professor);
+            // 2. Passa o objeto "anexado" (managed) para o repositório deletar
+            professorRepository.delete(professorNoBanco);
 
         } catch (Exception e) {
             System.err.println("[ERRO] Falha na operação delete: " + e.getMessage());
-            throw new RuntimeException("Erro ao excluir o professor.", e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 
     public List<Professor> findAll() {
         try {
-            List<Professor> professores = professorRepository.findAll();
-
-            if (professores == null || professores.isEmpty()) {
-                System.out.println("Nenhum professor cadastrado no momento.");
-            }
-
-            return professores;
-
+            return professorRepository.findAll();
         } catch (Exception e) {
-            System.err.println("[ERRO] Falha na operação findAll: " + e.getMessage());
             throw new RuntimeException("Erro ao buscar a lista de professores.", e);
         }
     }
 
     public Professor findByName(String nome) {
         try {
-            if (nome == null || nome.trim().isEmpty()) {
-                throw new IllegalArgumentException("O nome para busca não pode ser vazio.");
-            }
-
-            return professorRepository.findByName(nome);
-
+            return professorRepository.findByName(nome.toLowerCase().trim());
         } catch (Exception e) {
-            System.err.println("[ERRO] Falha na operação findByName: " + e.getMessage());
-            throw new RuntimeException("Erro ao buscar o professor pelo nome.", e);
+            return null;
         }
     }
 }

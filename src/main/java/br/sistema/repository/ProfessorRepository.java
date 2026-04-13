@@ -1,8 +1,11 @@
 package br.sistema.repository;
 
+import br.sistema.entity.Disciplina;
 import br.sistema.entity.Professor;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProfessorRepository {
@@ -13,35 +16,76 @@ public class ProfessorRepository {
         this.em = em;
     }
 
-    public void save (Professor professor ){
+    public void save(Professor professor) {
         em.getTransaction().begin();
-        em.persist(professor);//salva no banco (o professor)
-        em.getTransaction().commit();
-
+        try {
+            if (professor.getDisciplinas() != null) {
+                List<Disciplina> disciplinasManaged = new ArrayList<>();
+                for (Disciplina d : professor.getDisciplinas()) {
+                    disciplinasManaged.add(em.merge(d));
+                }
+                professor.setDisciplinas(disciplinasManaged);
+            }
+            em.persist(professor);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        }
     }
 
     public List<Professor> findAll(){
         return em.createQuery("from Professor", Professor.class).getResultList();
     }
 
-    public void update (Professor professor ){
+    public void update(Professor professor) {
         em.getTransaction().begin();
-        em.merge(professor);
-        em.getTransaction().commit();
+        try {
+            em.merge(professor);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        }
     }
 
-    public void delete (Professor professor ){
+    public void delete(Professor professor) {
         em.getTransaction().begin();
-        em.remove(em.contains(professor)?professor: em.merge(professor));//se o professor esta presente remove , senao ele adiciona e depois remove
-        em.getTransaction().commit();
+        try {
+            em.remove(em.contains(professor) ? professor : em.merge(professor));
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        }
     }
 
-    public Professor findByName(String nome){
-        List<Professor> lista = em
-                .createQuery("from Professor p where p.nome = :nome",Professor.class)
-                .setParameter("nome", nome)
-                .getResultList();
-        return lista.isEmpty() ? null : lista.get(0);
+    public Professor findByName(String nome) {
+        try {
+            return em.createQuery("SELECT p FROM Professor p WHERE LOWER(p.nome) = LOWER(:nome)", Professor.class)
+                    .setParameter("nome", nome)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    public List<Professor> findByDisciplina(Disciplina disc) {
+        try {
+            return em.createQuery(
+                            "SELECT p FROM Professor p WHERE :disc MEMBER OF p.disciplinas",
+                            Professor.class)
+                    .setParameter("disc", disc)
+                    .getResultList();
+        } catch (Exception e) {
+            System.err.println("[ERRO] Falha ao buscar professores por disciplina: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 }
-

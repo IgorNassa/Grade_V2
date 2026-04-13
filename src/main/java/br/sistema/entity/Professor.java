@@ -1,8 +1,6 @@
 package br.sistema.entity;
 
 import jakarta.persistence.*;
-
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -11,23 +9,23 @@ public class Professor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "nome", nullable = false)
+    private Long id; // O banco usa SERIAL PRIMARY KEY
 
-    private Long id;
+    @Column(name = "nome", nullable = false)
     private String nome;
 
     @ManyToMany
-    @JoinTable (
-            name = "professor_disciplina",
-            joinColumns = @JoinColumn(name = "professor_id"),//so define como as duas fks da tabela funcionam
-            inverseJoinColumns = @JoinColumn (name = "disciplina_id")
+    @JoinTable(
+            name = "professor_disciplina", // Nome da tabela intermédia definida no V3
+            joinColumns = @JoinColumn(name = "professor_id"), // FK que aponta para Professor
+            inverseJoinColumns = @JoinColumn(name = "disciplina_id") // FK que aponta para Disciplina
     )
-    private List<Disciplina> disciplinas = new ArrayList<>();
+    private List<Disciplina> disciplinas;
 
     public Professor() {
     }
 
-    public  Professor(Long id, String nome, List<Disciplina> disciplinas) {
+    public Professor(Long id, String nome, List<Disciplina> disciplinas) {
         this.id = id;
         this.nome = nome;
         this.disciplinas = disciplinas;
@@ -37,26 +35,23 @@ public class Professor {
         return id;
     }
 
-    public String getNome() {
-        return nome;
-    }
-
-    public List<Disciplina> getDisciplinas() {
-        return disciplinas;
-    }
-
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getNome() {
+        return nome;
     }
 
     public void setNome(String nome) {
         this.nome = nome;
     }
 
+    public List<Disciplina> getDisciplinas() {
+        return disciplinas;
+    }
+
     public void setDisciplinas(List<Disciplina> disciplinas) {
         this.disciplinas = disciplinas;
     }
-
 }
-
-

@@ -2,6 +2,7 @@ package br.sistema.repository;
 
 import br.sistema.entity.Turma;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 
 import java.util.List;
 
@@ -13,41 +14,60 @@ public class TurmaRepository {
         this.em = em;
     }
 
-    public void salvar (Turma turma) {
+    public void save(Turma turma) {
         em.getTransaction().begin();
-        em.persist(turma);
-        em.getTransaction().commit();
-        return;
+        try {
+            em.persist(turma);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        }
     }
 
     public List<Turma> findAll(){
-        return em.createQuery(
-                "from Turma", Turma.class
-        ).getResultList();
+        return em.createQuery("SELECT t FROM Turma t", Turma.class).getResultList();
     }
 
-    public void update (Turma turma){
+    public void update(Turma turma) {
         em.getTransaction().begin();
-        em.merge(turma);
-        em.getTransaction().commit();
+        try {
+            em.merge(turma);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        }
     }
 
-    public void delete (Turma turma) {
+    public void delete(Turma turma) {
         em.getTransaction().begin();
-        em.remove(turma);
-        em.getTransaction().commit();
+        try {
+            em.remove(em.contains(turma) ? turma : em.merge(turma));
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        }
     }
 
     public Turma findById(long id) {
-        return em.createQuery("SELECT t FROM Turma t WHERE t.id = :id", Turma.class)
-                .setParameter("id", id)
-                .getSingleResult();
+        return em.find(Turma.class, id);
     }
 
-
     public Turma findByName(String nome) {
-        return em.createQuery("SELECT t FROM Turma t WHERE t.nome = :nome", Turma.class)
-                .setParameter("nome", nome)
-                .getSingleResult();
+        try {
+            return em.createQuery("SELECT t FROM Turma t WHERE LOWER(t.nome) = LOWER(:nome)", Turma.class)
+                    .setParameter("nome", nome)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 }

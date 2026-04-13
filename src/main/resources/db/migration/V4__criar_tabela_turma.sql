@@ -1,17 +1,19 @@
-CREATE TABLE IF NOT EXISTS TURMA(
-    id SERIAL NOT NULL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS turma (
+    id SERIAL PRIMARY KEY,
     nome VARCHAR(20) NOT NULL,
-    e_medio BOOLEAN NOT NULL,
+    e_medio BOOLEAN NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS TURMA_DISCIPLINA (
-    turma_disciplina_id SERIAL NOT NULL PRIMARY KEY,
-    turma_id BIGINT NOT NULL,
-    disciplina_id VARCHAR(100) NOT NULL,
+CREATE TABLE IF NOT EXISTS turma_disciplina (
+    turma_disciplina_id SERIAL PRIMARY KEY,
+    turma_id INT NOT NULL,
+    disciplina_id INT NOT NULL,
+    CONSTRAINT fk_turma
+    FOREIGN KEY (turma_id)
+
+    REFERENCES turma (id) ON DELETE CASCADE,
+
+    CONSTRAINT fk_disciplina
+    FOREIGN KEY (disciplina_id)
+    REFERENCES disciplina (id) ON DELETE CASCADE
 );
-
-    CONSTRAINT fk_turma FOREIGN KEY(turma_id)
-    REFERENCES TURMA (turma_id)
-
-    CONSTRAINT fk_disciplina FOREIGN KEY(displina_id)
-        REFERENCES DISCIPLINA(disciplina_id)

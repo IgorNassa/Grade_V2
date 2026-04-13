@@ -6,13 +6,13 @@ import jakarta.persistence.*;
 @Table
 public class Turma {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column (length = 20, nullable = false)
     private String nome;
 
-    @Column(nullable = false)
-    private Boolean eMedio;
+    @Column(name = "e_medio", nullable = false) // Mapeamento explícito para o banco
+    private boolean eMedio;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
